@@ -14,6 +14,7 @@ import { createRail } from './rail.js';
 import { createAvatar } from './avatar.js';
 import { createDopamineRoom } from './rooms/dopamine.js';
 import * as audio from './audio.js';
+import { initAnalytics } from './analytics.js';
 
 const TRACK = 46; // world units from threshold to the turn
 const LEVER_AT = 0.34; // where along the track the door stands
@@ -24,9 +25,11 @@ const REVEAL_HOLD = 2.6;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouch = window.matchMedia('(hover: none)').matches;
 
-const canvas = document.getElementById('scene');
-const hint = document.getElementById('hint');
-const again = document.getElementById('again');
+const canvas = document.getElementById('scene') as HTMLCanvasElement;
+const hint = document.getElementById('hint') as HTMLParagraphElement;
+const again = document.getElementById('again') as HTMLButtonElement;
+
+initAnalytics();
 
 // --- renderer ---------------------------------------------------------------
 
@@ -38,7 +41,8 @@ renderer.toneMappingExposure = 1.05;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#0b0d16');
-scene.fog = new THREE.FogExp2('#0b0d16', 0.028);
+const fog = new THREE.FogExp2('#0b0d16', 0.028);
+scene.fog = fog;
 
 const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 120);
 
@@ -111,7 +115,8 @@ window.addEventListener('keydown', () => audio.start(), { once: true });
 
 // --- beats ------------------------------------------------------------------
 
-let phase = 'travel'; // travel -> turn -> reveal
+type Phase = 'travel' | 'turn' | 'reveal';
+let phase: Phase = 'travel';
 let turnT = 0;
 let revealT = 0;
 let idleInReach = 0;
@@ -121,9 +126,10 @@ const front = new THREE.Vector3(0, 1.16, -3.05);
 const camPos = new THREE.Vector3();
 const lookAt = new THREE.Vector3();
 
-const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const easeInOut = (x: number): number =>
+  x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
-function setHint(text) {
+function setHint(text: string): void {
   if (hint.textContent === text) return;
   hint.textContent = text;
   hint.classList.toggle('visible', Boolean(text));
@@ -135,7 +141,7 @@ let last = performance.now();
 let elapsed = 0; // animation time: dt-capped, so a backgrounded tab doesn't jump
 let wall = 0; // real time: what the hints are actually paced against
 
-function frame(now) {
+function frame(now: number): void {
   const raw = (now - last) / 1000;
   const dt = Math.min(raw, 0.05);
   last = now;
@@ -155,7 +161,7 @@ function frame(now) {
 
   // The world responds to the weight of the self it is carrying.
   const weight = state.weight();
-  scene.fog.density = 0.026 + weight * 0.032;
+  fog.density = 0.026 + weight * 0.032;
   renderer.toneMappingExposure = 1.05 - weight * 0.12;
 
   if (phase === 'travel' && progress >= TURN_AT) {
@@ -215,7 +221,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-function resize() {
+function resize(): void {
   const w = window.innerWidth;
   const h = window.innerHeight;
   renderer.setSize(w, h, false);
@@ -242,6 +248,18 @@ resize();
 requestAnimationFrame(frame);
 
 // Handy while testing the mirror — read the state the avatar is showing.
+// Also what the Playwright smoke test drives.
+declare global {
+  interface Window {
+    secondSelf: {
+      state: typeof state;
+      room: typeof room;
+      rail: typeof rail;
+      debug: () => Record<string, unknown>;
+    };
+  }
+}
+
 window.secondSelf = {
   state,
   room,
@@ -249,6 +267,7 @@ window.secondSelf = {
   debug: () => ({
     phase,
     progress: rail.progress,
+    target: rail.target,
     elapsed,
     wall,
     leverInReach,

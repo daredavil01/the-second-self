@@ -30,13 +30,13 @@ const COST_SCALE = 0.058;
 const BURST_COUNT = 90;
 
 /** The panel reads as light, not plaster — a bright core falling off to nothing. */
-function panelTexture() {
+function panelTexture(): THREE.CanvasTexture {
   const w = 64;
   const h = 128;
   const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d')!;
   const g = ctx.createRadialGradient(w / 2, h * 0.42, 2, w / 2, h * 0.42, h * 0.62);
   g.addColorStop(0, 'rgba(255,236,206,1)');
   g.addColorStop(0.45, 'rgba(255,180,105,0.7)');
@@ -48,7 +48,23 @@ function panelTexture() {
   return tex;
 }
 
-export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
+export interface DopamineRoom {
+  group: THREE.Group;
+  readonly pulls: number;
+  pull(): void;
+  update(dt: number, t: number, distance: number): void;
+  reset(): void;
+}
+
+export function createDopamineRoom({
+  z,
+  x = -2.9,
+  reducedMotion = false,
+}: {
+  z: number;
+  x?: number;
+  reducedMotion?: boolean;
+}): DopamineRoom {
   const group = new THREE.Group();
   group.position.z = z;
 
@@ -138,7 +154,8 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
   const burstGeometry = new THREE.BufferGeometry();
   const positions = new Float32Array(BURST_COUNT * 3);
   const velocities = new Float32Array(BURST_COUNT * 3);
-  burstGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const burstAttribute = new THREE.BufferAttribute(positions, 3);
+  burstGeometry.setAttribute('position', burstAttribute);
   const burstMaterial = new THREE.PointsMaterial({
     color: warm.clone(),
     size: 0.1,
@@ -154,18 +171,21 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
   door.add(burst);
   let burstLife = 0;
 
-  function fireBurst(strength) {
+  function fireBurst(strength: number): void {
     const spread = 1.5 + strength * 3.0;
     for (let i = 0; i < BURST_COUNT; i++) {
-      positions[i * 3] = positions[i * 3 + 1] = positions[i * 3 + 2] = 0;
+      const o = i * 3;
+      positions[o] = 0;
+      positions[o + 1] = 0;
+      positions[o + 2] = 0;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(Math.random() * 2 - 1);
       const speed = (0.3 + Math.random() * 0.9) * spread;
-      velocities[i * 3] = Math.sin(phi) * Math.cos(theta) * speed;
-      velocities[i * 3 + 1] = Math.abs(Math.cos(phi)) * speed * 0.8;
-      velocities[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * speed * 0.6;
+      velocities[o] = Math.sin(phi) * Math.cos(theta) * speed;
+      velocities[o + 1] = Math.abs(Math.cos(phi)) * speed * 0.8;
+      velocities[o + 2] = Math.sin(phi) * Math.sin(theta) * speed * 0.6;
     }
-    burstGeometry.attributes.position.needsUpdate = true;
+    burstAttribute.needsUpdate = true;
     burstLife = 1;
     burst.visible = true;
     burstMaterial.opacity = 0.3 + strength * 0.5;
@@ -173,7 +193,7 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
 
   return {
     group,
-    get pulls() {
+    get pulls(): number {
       return pulls;
     },
 
@@ -181,7 +201,7 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
      * The whole point of the room, in four lines: the reward decays, the cost
      * does not, and the answer is always yes.
      */
-    pull() {
+    pull(): void {
       const strength = 1 / (1 + pulls * 0.42);
 
       audio.pull(strength, pulls);
@@ -194,7 +214,7 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
       state.mark('scale', COST_SCALE);
     },
 
-    update(dt, t, distance) {
+    update(dt: number, t: number, distance: number): void {
       // Settle the lever back. It is always ready again before you are.
       leverSwing = Math.max(0, leverSwing - dt * 3.4);
       leverPivot.rotation.x = -leverSwing * 0.95;
@@ -223,12 +243,14 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
 
       if (burstLife > 0) {
         burstLife -= dt * 1.15;
+        const gravity = (1 - burstLife) * 2.4;
         for (let i = 0; i < BURST_COUNT; i++) {
-          positions[i * 3] += velocities[i * 3] * dt;
-          positions[i * 3 + 1] += (velocities[i * 3 + 1] - (1 - burstLife) * 2.4) * dt;
-          positions[i * 3 + 2] += velocities[i * 3 + 2] * dt;
+          const o = i * 3;
+          positions[o] = (positions[o] ?? 0) + (velocities[o] ?? 0) * dt;
+          positions[o + 1] = (positions[o + 1] ?? 0) + ((velocities[o + 1] ?? 0) - gravity) * dt;
+          positions[o + 2] = (positions[o + 2] ?? 0) + (velocities[o + 2] ?? 0) * dt;
         }
-        burstGeometry.attributes.position.needsUpdate = true;
+        burstAttribute.needsUpdate = true;
         burstMaterial.opacity *= 0.94;
         if (burstLife <= 0) {
           burstLife = 0;
@@ -238,7 +260,7 @@ export function createDopamineRoom({ z, x = -2.9, reducedMotion = false }) {
       }
     },
 
-    reset() {
+    reset(): void {
       pulls = 0;
       leverSwing = 0;
       flash = 0;

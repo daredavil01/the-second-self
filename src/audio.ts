@@ -10,14 +10,14 @@
  *   2. The turn is SILENT. That silence will hit harder than any music.
  */
 
-let ctx = null;
-let master = null;
-let bed = null;
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let bed: GainNode | null = null;
 let started = false;
 
-const PENTATONIC = [0, 3, 5, 7, 10]; // no leading tones — nothing that begs to resolve
+const PENTATONIC: readonly number[] = [0, 3, 5, 7, 10]; // no leading tones — nothing that begs to resolve
 
-function noiseBuffer(duration = 0.4) {
+function noiseBuffer(ctx: AudioContext, duration = 0.4): AudioBuffer {
   const length = Math.floor(ctx.sampleRate * duration);
   const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -26,9 +26,11 @@ function noiseBuffer(duration = 0.4) {
 }
 
 /** Must be called from inside a user gesture, or the browser will refuse. */
-export function start() {
+export function start(): void {
   if (started) return;
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  const AudioCtx =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioCtx) return;
   started = true;
 
@@ -48,11 +50,12 @@ export function start() {
   filter.Q.value = 0.6;
   filter.connect(bed);
 
-  for (const [freq, detune] of [
+  const drones: ReadonlyArray<readonly [number, number]> = [
     [55, -4],
     [82.4, 5],
     [110, 0],
-  ]) {
+  ];
+  for (const [freq, detune] of drones) {
     const osc = ctx.createOscillator();
     osc.type = 'sine';
     osc.frequency.value = freq;
@@ -72,15 +75,15 @@ export function start() {
  *        always there — it just returns less and less. That gap between "it
  *        still feels good" and "it gives less" is the whole facet.
  */
-export function pull(strength = 1, index = 0) {
-  if (!ctx) return;
+export function pull(strength = 1, index = 0): void {
+  if (!ctx || !master) return;
   const now = ctx.currentTime;
   const s = Math.max(0.06, strength);
 
   // The mechanism: a dry, physical clunk. This part never fades — the machine
   // is as eager on the twentieth pull as the first.
   const clunk = ctx.createBufferSource();
-  clunk.buffer = noiseBuffer(0.18);
+  clunk.buffer = noiseBuffer(ctx, 0.18);
   const clunkFilter = ctx.createBiquadFilter();
   clunkFilter.type = 'bandpass';
   clunkFilter.frequency.value = 420;
@@ -93,7 +96,7 @@ export function pull(strength = 1, index = 0) {
   clunk.stop(now + 0.2);
 
   // The reward: a bright chord that loses its top end and its bloom each time.
-  const semitone = PENTATONIC[index % PENTATONIC.length];
+  const semitone = PENTATONIC[index % PENTATONIC.length]!;
   const root = 293.66 * Math.pow(2, semitone / 12) * Math.pow(2, -Math.floor(index / 14));
 
   const voice = ctx.createGain();
@@ -109,12 +112,13 @@ export function pull(strength = 1, index = 0) {
   voice.gain.exponentialRampToValueAtTime(peak, now + 0.012);
   voice.gain.exponentialRampToValueAtTime(0.0001, now + 0.35 + 1.0 * s);
 
-  for (const [ratio, level] of [
+  const partials: ReadonlyArray<readonly [number, number]> = [
     [1, 1],
     [1.5, 0.5],
     [2, 0.34 * s],
     [3, 0.18 * s],
-  ]) {
+  ];
+  for (const [ratio, level] of partials) {
     const osc = ctx.createOscillator();
     osc.type = ratio === 1 ? 'triangle' : 'sine';
     osc.frequency.value = root * ratio;
@@ -127,12 +131,12 @@ export function pull(strength = 1, index = 0) {
 }
 
 /** The turn. Everything stops. */
-export function silence(seconds = 1.6) {
-  if (!ctx) return;
+export function silence(seconds = 1.6): void {
+  if (!ctx || !master) return;
   master.gain.setTargetAtTime(0.0001, ctx.currentTime, seconds / 4);
 }
 
-export function restore(seconds = 1.2) {
-  if (!ctx) return;
+export function restore(seconds = 1.2): void {
+  if (!ctx || !master) return;
   master.gain.setTargetAtTime(0.9, ctx.currentTime, seconds / 4);
 }

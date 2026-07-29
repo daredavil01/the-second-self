@@ -12,28 +12,18 @@
     />
 
     <!--
-      Phase 0 — the vertical slice. Deliberately buildless: no bundler, no
-      package.json, no install. Open this file and it runs. Vite arrives at
-      Phase 0.5, once real assets do. See docs/IMPLEMENTATION-PLAN.md.
+      Three.js is bundled from node_modules, never fetched from a CDN. This
+      piece promises that nothing leaves your device, and a CDN import would
+      make every visitor's browser call a third party on arrival — breaking
+      the promise on the very first request, before the user has done a thing.
+      Bundling keeps every byte first-party.
 
-      Three.js is VENDORED rather than pulled from a CDN. This piece promises
-      that nothing leaves your device, and a CDN import makes every visitor's
-      browser call a third party on arrival — which would quietly break the
-      promise on the very first request. It also removes a runtime dependency
-      on someone else's uptime. (vendor/README.md records the version.)
-
-      Every path here is relative. On GitHub Pages this is served from a
-      subdirectory, and an absolute path is the single most common way that
-      deployment breaks — it works locally and 404s in production.
+      Vite is configured with a RELATIVE base, so every emitted path is
+      relative. On GitHub Pages this is served from a subdirectory, and a
+      root-absolute path is the single most common way that deployment breaks:
+      it works locally and 404s in production. `npm run check:paths` fails the
+      build if one ever creeps in.
     -->
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "./vendor/three.module.min.js"
-        }
-      }
-    </script>
-
     <style>
       :root {
         --ink: #e7e2d8;
@@ -122,6 +112,24 @@
         }
       }
 
+      #promise {
+        position: fixed;
+        left: 50%;
+        bottom: 1rem;
+        transform: translateX(-50%);
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: lowercase;
+        color: rgba(231, 226, 216, 0.24);
+        text-decoration: none;
+        transition: color 0.6s ease;
+      }
+
+      #promise:hover,
+      #promise:focus-visible {
+        color: rgba(231, 226, 216, 0.6);
+      }
+
       noscript {
         position: fixed;
         inset: 0;
@@ -144,10 +152,12 @@
       <button id="again" type="button">again</button>
     </div>
 
+    <a id="promise" href="./privacy/">nothing leaves your device</a>
+
     <noscript>
       <p>Second Self is a small 3D world, and it needs JavaScript to run.</p>
     </noscript>
 
-    <script type="module" src="./src/main.js"></script>
+    <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

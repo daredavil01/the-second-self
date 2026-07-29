@@ -11,16 +11,20 @@
  */
 
 import * as THREE from 'three';
+import type { SelfState } from './state.js';
 
 const VITAL = new THREE.Color('#ffc27a'); // warm, present
 const DRAINED = new THREE.Color('#7d8290'); // grey, but never sickly
 
 /** A soft radial falloff, drawn once and reused for the glow and the haze. */
-function radialTexture(inner = 'rgba(255,214,160,0.85)', outer = 'rgba(255,190,120,0)') {
+function radialTexture(
+  inner = 'rgba(255,214,160,0.85)',
+  outer = 'rgba(255,190,120,0)'
+): THREE.CanvasTexture {
   const size = 128;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d')!;
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   g.addColorStop(0, inner);
   g.addColorStop(1, outer);
@@ -31,7 +35,14 @@ function radialTexture(inner = 'rgba(255,214,160,0.85)', outer = 'rgba(255,190,1
   return tex;
 }
 
-export function createAvatar({ reducedMotion = false } = {}) {
+export interface Avatar {
+  root: THREE.Group;
+  focus: THREE.Vector3;
+  attend(k: number): void;
+  update(s: SelfState, t: number): void;
+}
+
+export function createAvatar({ reducedMotion = false }: { reducedMotion?: boolean } = {}): Avatar {
   const root = new THREE.Group(); // travels the track
   const body = new THREE.Group(); // carries posture and scale
   root.add(body);
@@ -95,11 +106,11 @@ export function createAvatar({ reducedMotion = false } = {}) {
      * back at you" needs *something*, so the figure gathers itself: it lifts,
      * its light comes up, and the haze pulls in. Attention, not a face.
      */
-    attend(k) {
+    attend(k: number): void {
       attention = k;
     },
 
-    update(s, t) {
+    update(s: SelfState, t: number): void {
       // SCALE — present -> diminished. Never so small it reads as comic.
       const size = 1 - s.scale * 0.38;
       body.scale.setScalar(size);

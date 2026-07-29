@@ -179,15 +179,17 @@ Living tracker — update the status cells as each phase moves.
 | Phase | What it delivers | Status | Design confirmed | Exit criterion met? |
 |---|---|---|---|---|
 | **0** — Prove the feeling | One HTML file, dopamine room, bare reveal | 🟡 In progress — built, awaiting your preview | ⬜ D1–D4 | ⬜ cold-user test not yet run |
-| **0.5** — Foundation | Vite + TS, Pages deploy, path guard, GoatCounter, `/privacy/` | ⬜ Not started | n/a | — |
+| **0.5** — Foundation | Vite + TS, Pages deploy, path guard, GoatCounter, `/privacy/` | ✅ Done | n/a | ✅ build + guards + smoke tests green |
 | **1** — Core journey | All five rooms, accumulating state, the turn, the reveal, audio | ⬜ Not started | ⬜ D5–D7 | — |
 | **2** — Share engine | End card, named selves, share sheet, link-back, replay | ⬜ Not started | ⬜ D8–D9 | — |
 | **3** — Peaceful place | Hub, gallery, tend beat, soft cap, export code, `/about/` `/credits/` | ⬜ Not started | ⬜ D10–D12 | — |
 | **4** — Evidence surface | `/evidence/` myth-busting subset, verified reference links | ⬜ Not started | ⬜ D13 | — |
 | **5+** — Toolkit | 2D modules, lesson engine, role lens, educator materials, Part E | ⏸️ Deferred | — | Gated on Phase 2 user evidence |
 
-**Current position:** Phase 0 is built and runs end to end. Next action is the D1–D4
-design confirmation (§4) — you play it — and only then the 5–10 person cold-user test.
+**Current position:** Phase 0 is built and Phase 0.5 is complete — the project now
+builds, type-checks, guards its own paths and budget, tests itself, and deploys. The
+blocking item is still the **D1–D4 design confirmation** (§4): you play Phase 0 and
+confirm the feel, then the 5–10 person cold-user test, then Phase 1.
 
 ---
 
@@ -218,7 +220,7 @@ design.
 avatar change in response to *their own* choices produce "oh… that's me"? If not, redesign
 the mirror before building anything else. Do not proceed on hope.
 
-### Phase 0.5 — Foundation ⬜ Not started
+### Phase 0.5 — Foundation ✅ Done
 
 Only after Phase 0 passes both gates.
 
@@ -232,6 +234,21 @@ Only after Phase 0 passes both gates.
 - Performance budget, with a real mid-range Android in the loop
 - The GoatCounter snippet and `/privacy/` ship **together**, so the promise is live on
   the first public deploy
+
+**As built**, with two deliberate refinements:
+
+- `base: './'` rather than a hard-coded `'/the-second-self/'`. Both fix the subpath
+  problem; relative additionally survives a custom domain, a user page, or a local
+  `vite preview` with no config change. `scripts/check-paths.mjs` enforces it against the
+  built output and has been verified to fail on a deliberately broken build.
+- **Three.js moved from `vendor/` to an npm dependency.** Vite bundles it first-party, so
+  the no-third-party-request property that motivated vendoring is preserved, and version
+  updates become `npm update` instead of a manual copy.
+- Analytics is **off unless `VITE_GOATCOUNTER` is set**, and obeys Do Not Track and
+  Global Privacy Control before making any request. A fork of this repo is silent by
+  default. A smoke test asserts the page makes no third-party request at all.
+- The performance budget is measured **gzipped**, since that is what a phone on mobile
+  data actually pays. Current: **139KB of a 300KB ceiling.**
 
 Purely structural — no design confirmation gate. Its value is that from here on, every
 subsequent preview is a real deployed URL you can open on any device.

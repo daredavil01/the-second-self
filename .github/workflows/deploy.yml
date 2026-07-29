@@ -1,0 +1,83 @@
+name: Build & deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Never let two deploys race; never cancel one halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check and build
+        run: npm run build
+        env:
+          # Empty unless the repository variable is set, and empty means the
+          # analytics script is never loaded at all. A fork of this repo is
+          # silent by default and cannot accidentally report to someone else.
+          VITE_GOATCOUNTER: ${{ vars.GOATCOUNTER_CODE }}
+
+      # The highest-value check in this pipeline. A root-absolute asset path
+      # works perfectly in dev and preview, then 404s on Pages, which serves
+      # this site from a subdirectory.
+      - name: Check for root-absolute paths
+        run: npm run check:paths
+
+      - name: Check performance budget
+        run: npm run check:size
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke tests
+        run: npm test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Package for Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy to Pages
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
