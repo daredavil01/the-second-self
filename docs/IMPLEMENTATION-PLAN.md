@@ -154,11 +154,11 @@ survive being described in prose.
 | D2 | Avatar visual language | Stills at min and max of each of the five dimensions | Phase 0 | ⬜ |
 | D3 | Palette and overall tone | Live build | Phase 0 | ⬜ |
 | D4 | The reveal beat — camera turn, silence, timing | Screen capture of the turn | Phase 0 | ⬜ |
-| D5 | Each of the five room designs, one at a time | Live build, room by room | Phase 1 | ⬜ |
-| D6 | Run pacing at 6–7 minutes | Timed full playthrough | Phase 1 | ⬜ |
+| D5 | Each of the five room designs, one at a time | Live build, room by room — `?room=attention` · `flood` · `dopamine` · `comparison` · `notifications` | Phase 1 | ⬜ |
+| D6 | Run pacing at 6–7 minutes | Timed full playthrough, no query string | Phase 1 | ⬜ |
 | D7 | Audio beds, and the silence at the turn | Capture with sound | Phase 1 | ⬜ |
-| D8 | The ~8 named selves — exact wording | Plain list, reviewed before it is wired in | Phase 2 | ⬜ |
-| D9 | End-card layout | Rendered cards from three different runs | Phase 2 | ⬜ |
+| D8 | The ~8 named selves — exact wording, **including the fully-diminished one** (see §5) | Plain list, reviewed before it is wired in — the eight live alone in `src/share/naming.ts`, so rewriting all of them touches no mechanism | Phase 2 | ⬜ |
+| D9 | End-card layout | Rendered cards from three different runs — `npm run cards` | Phase 2 | ⬜ |
 | D10 | Peaceful place register — warmth, pace, ambience | Live build | Phase 3 | ⬜ |
 | D11 | Gallery presentation — ambient, not a completion grid | Live build with several saved selves | Phase 3 | ⬜ |
 | D12 | About / privacy / credits copy in your named voice | Draft copy, before it is published | Phase 3 | ⬜ |
@@ -180,16 +180,57 @@ Living tracker — update the status cells as each phase moves.
 |---|---|---|---|---|
 | **0** — Prove the feeling | One HTML file, dopamine room, bare reveal | 🟡 In progress — built, awaiting your preview | ⬜ D1–D4 | ⬜ cold-user test not yet run |
 | **0.5** — Foundation | Vite + TS, Pages deploy, path guard, GoatCounter, `/privacy/` | ✅ Done | n/a | ✅ build + guards + smoke tests green |
-| **1** — Core journey | All five rooms, accumulating state, the turn, the reveal, audio | ⬜ Not started | ⬜ D5–D7 | — |
-| **2** — Share engine | End card, named selves, share sheet, link-back, replay | ⬜ Not started | ⬜ D8–D9 | — |
+| **1** — Core journey | All five rooms, accumulating state, the turn, the reveal, audio | ✅ Done — engineering complete and verified | ⬜ D5–D7 still open | ✅ anti-railroad gate green |
+| **2** — Share engine | End card, named selves, share sheet, link-back, replay | 🟡 In progress — built, awaiting your preview | ⬜ D8–D9 | — |
 | **3** — Peaceful place | Hub, gallery, tend beat, soft cap, export code, `/about/` `/credits/` | ⬜ Not started | ⬜ D10–D12 | — |
 | **4** — Evidence surface | `/evidence/` myth-busting subset, verified reference links | ⬜ Not started | ⬜ D13 | — |
 | **5+** — Toolkit | 2D modules, lesson engine, role lens, educator materials, Part E | ⏸️ Deferred | — | Gated on Phase 2 user evidence |
 
-**Current position:** Phase 0 is built and Phase 0.5 is complete — the project now
-builds, type-checks, guards its own paths and budget, tests itself, and deploys. The
-blocking item is still the **D1–D4 design confirmation** (§4): you play Phase 0 and
-confirm the feel, then the 5–10 person cold-user test, then Phase 1.
+**Current position:** Phase 1 was **closed on 2026-07-29 at the builder's instruction**
+("complete phase 1"), with its engineering complete and verified: the whole journey runs,
+the exit criterion is met, and the suite is green on desktop and mobile.
+
+**It was closed with D5–D7 open, which the protocol in §4 does not allow.** That is
+recorded here rather than smoothed over, because the rule exists for a reason and this is
+the second time the phase order has been broken. What "✅ Done" means for Phase 1 is
+narrower than it looks:
+
+- ✅ **Engineering** — five rooms, accumulating state, the turn, the reveal, per-room audio,
+  the pacing pass, a graceful failure where the world cannot be drawn. Build, path guard,
+  size budget and 34 tests green on desktop and mobile.
+- ✅ **Exit criterion** — an automated pair of playthroughs proves the two trajectories end
+  somewhere materially different on every dimension.
+- ⬜ **Design confirmation** — D5, D6 and D7 have not been previewed. Nobody has walked the
+  finished journey end to end, timed it, or heard it. Phase 0's D1–D4 and its 5–10 person
+  cold-user test are also still owed.
+
+**So Phase 1 is done as a piece of software and unproven as a piece of design.** The
+outstanding gates are cheaper to run than they were — `?room=<name>` starts you beside any
+single room, which is exactly the "one at a time" review D5 asks for — and if any of them
+comes back badly, reopening this row is the correct outcome, not a regression.
+
+**On saturation — reviewed 2026-07-29, kept as built.** Costs are calibrated so that a run
+of roughly seven takes per room lands each dimension near 0.6 — mid-range, with shape. But
+three of the rooms are deliberately unbounded (the lever never says no, the flood always
+accepts one more, the storm keeps pinging), so a player who taps hard enough pins all five
+at their maximum and arrives at the same self as every other such player. That stands: it
+is the honest outcome for someone who takes everything on offer, and capping it would mean
+either the lever saying no or the cost per pull decaying — and the dopamine room exists
+precisely because the reward decays while the cost does not.
+
+The consequence lands in Phase 2, not here: **one of the ~8 named selves must be the
+fully-diminished one**, and it has to be written as a characterisation rather than a
+verdict, like every other name. Re-examined at D8.
+
+**Phase 2 was then started on 2026-07-29 at the builder's instruction** ("start with phase
+2"), with D1–D7 and the cold-user test still outstanding — which §4 does not allow either,
+and which is recorded here for the same reason as above. The share engine is built and
+previewable; **D8 and D9 are open and nothing in it is signed off.**
+
+D8 in particular was honoured as far as it can be without blocking: the eight names live
+alone in `src/share/naming.ts` with nothing else in the file, so reviewing them as a plain
+list and rewriting every one of them is a single-file edit that touches no mechanism. They
+are a first draft, not a proposal to accept.
 
 ---
 
@@ -253,7 +294,7 @@ Only after Phase 0 passes both gates.
 Purely structural — no design confirmation gate. Its value is that from here on, every
 subsequent preview is a real deployed URL you can open on any device.
 
-### Phase 1 — The core journey ⬜ Not started
+### Phase 1 — The core journey ✅ Done (engineering) · ⬜ D5–D7 open
 
 - Four more rooms: `attention`, `flood`, `comparison`, `notifications`
 - Accumulating state across all five, per the ownership table in §3
@@ -274,7 +315,30 @@ which the five-facet trade in §1 gets honestly re-examined.
 playthrough end in materially different state vectors. This is the anti-railroad
 guarantee, and both replay and the gallery depend on it.
 
-### Phase 2 — The share engine ⬜ Not started
+**As built**, with four things worth knowing:
+
+- **Room order is attention → flood → dopamine → comparison → notifications**, the way the
+  argument escalates, with the storm last on purpose: it is the only room that rewards
+  doing nothing, so the silence at the turn arrives as relief for one kind of player and as
+  an ambush for the other.
+- **The rail has a floor pace.** Progress is speed-capped and input banks rather than
+  piling up, so scrolling harder no longer collapses the journey into two flicks. Roughly
+  two minutes forty of pure travel before a second is spent in a room.
+- **`?room=<name>` and `?pace=<n>`** are preview affordances, not mechanics. They let a
+  single room be looked at without replaying everything in front of it, which is what this
+  phase's confirmation protocol asks for. Neither changes anything for a visitor who
+  arrives without them.
+- **Rooms are staged against each other**, each confined to a shared body budget, with a
+  breath of empty world between. Built one at a time they overlapped badly — see
+  [`LESSONS.md`](../LESSONS.md) L15.
+- **Two clocks, and the turn is on the interface one.** Anything that gates what comes next
+  is paced against the wall rather than against the dt-capped animation accumulator, or it
+  runs slow on a weak device — the turn stretched from under four seconds to fourteen at
+  five frames a second. See [`LESSONS.md`](../LESSONS.md) L19.
+- **A graceful failure where there is no WebGL**, rather than a black rectangle nobody can
+  tell from a slow load. The floor of the accessibility line in *Cross-cutting*, below.
+
+### Phase 2 — The share engine 🟡 In progress
 
 Arguably as important as Phase 1 for the advocacy goal — people share results, not
 experiences.
@@ -292,6 +356,36 @@ of them are wired in** — this is the highest-risk copy in the project, because
 name that reads as a verdict rather than a characterisation reintroduces the shame the
 whole design exists to avoid. Then rendered cards from three genuinely different runs
 confirm the layout.
+
+**As built**, with five things worth knowing:
+
+- **The eight are one lightest, five leans, one middle, one heaviest.** The vector is read
+  for its *shape*, not its size: a run where one dimension stands clearly above the other
+  four is named for the room that did it; a run with no lean is named for having no lean.
+  The lightest and the heaviest are two of eight written in the same voice, not a top and a
+  bottom of a scale.
+- **Nothing on the card is a number**, and this is enforced rather than intended: a test
+  asserts no name or line contains a digit, and none of them contains the vocabulary of a
+  report card (score, rank, grade, healthy, worse, should…).
+- **The card is composed off-screen at 1080×1350**, from a portrait render target rather
+  than a grab off the visible canvas — so it does not depend on the shape of the player's
+  window and does not cost every visitor `preserveDrawingBuffer` for a feature at most one
+  of them reaches. It is built the moment the reveal settles, not when the button is
+  pressed: Safari refuses `navigator.share()` if anything is awaited first.
+- **Open Graph tags carry the only absolute URLs in the project**, because no unfurler
+  resolves a relative `og:image` and there is no server here to rewrite one. The image is
+  drawn arithmetically by `npm run og` with no dependencies and committed; everything else
+  stays relative.
+- **`npm run cards`** renders the D9 artifact — three cards from three genuinely different
+  runs, in about twenty seconds. It exists because the names and the layout will change at
+  least once, and a gate that is cheap to re-run is a gate that gets re-run. It also earned
+  its keep immediately: it found a layout bug ([LESSONS L20](../LESSONS.md)) that every
+  existing assertion passed straight over.
+
+**Two things the cards made visible are avatar work, not card work, and were deliberately
+left alone** rather than self-approved under D2: at full fog the clarity shell reads as a
+hard-edged capsule *around* the figure rather than as edges coming apart, and stray room
+furniture floats in the far background of some portraits. Both belong to that gate.
 
 ### Phase 3 — The peaceful place & return layer ⬜ Not started
 
@@ -344,16 +438,27 @@ isolated behind that one gate.
 ```
 index.html
 src/
-  main.ts          state.ts        rail.ts         avatar.ts
-  rooms/           attention.ts  flood.ts  dopamine.ts  comparison.ts  notifications.ts
+  main.ts          state.ts        rail.ts         avatar.ts       audio.ts
+  rooms/           types.ts  attention.ts  flood.ts  dopamine.ts  comparison.ts  notifications.ts
   scenes/          threshold.ts  turn.ts   reveal.ts    peaceful.ts
   share/           card.ts       naming.ts
-  audio/           beds.ts
   storage/         local.ts      gallery.ts   portable.ts
+public/            og.png        (generated by scripts/make-og.mjs, committed)
+scripts/           check-paths.mjs  check-size.mjs  make-og.mjs  cards.mjs
 about/ privacy/ evidence/ credits/     (plain static HTML, outside the canvas)
 docs/IMPLEMENTATION-PLAN.md
 .github/workflows/deploy.yml
 ```
+
+Two departures from the sketch above, both settled by what actually got built. Audio is one
+file rather than an `audio/` directory — there is no library, only synthesis, and splitting
+it buys nothing. And the threshold, the turn and the reveal are beats in `main.ts` rather
+than files in `scenes/`: they are three camera states on one continuous journey, not
+separate scenes, and giving them their own modules would only spread one loop across four
+files. `scenes/peaceful.ts` still lands in Phase 3, where it genuinely is a separate place.
+
+`rooms/types.ts` is the room contract — what every room is, how far an offer reaches, how
+much world a room may occupy, and the two things a room may ask of the world outside it.
 
 The four content pages sit **outside** the 3D canvas deliberately: fast, linkable,
 indexable, and they cost no WebGL.

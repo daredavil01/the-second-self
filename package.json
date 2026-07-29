@@ -9,6 +9,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "og": "node scripts/make-og.mjs",
+    "cards": "npm run build && node scripts/cards.mjs",
     "check:paths": "node scripts/check-paths.mjs",
     "check:size": "node scripts/check-size.mjs",
     "test": "playwright test",

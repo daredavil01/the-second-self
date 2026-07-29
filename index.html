@@ -6,6 +6,39 @@
     <title>Second Self</title>
     <meta name="description" content="A short symbolic world about the person your digital habits are quietly building." />
     <meta name="color-scheme" content="dark" />
+
+    <!--
+      The link preview. People share results, not experiences, so the unfurl is
+      part of the piece rather than housekeeping — a link that arrives as a grey
+      box is a link nobody opens.
+
+      These four URLs are the only absolute ones in the project, and they have
+      to be: no unfurler resolves a relative og:image reliably, and there is no
+      server here to rewrite them. Everything else stays relative so the build
+      survives a move (see vite.config.ts). If this ever ships from a different
+      host, these are what to change.
+
+      The image is drawn by `npm run og` and committed. There is no text in it:
+      the title and description below are the words, and the image is the mood.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Second Self" />
+    <meta property="og:title" content="Second Self" />
+    <meta
+      property="og:description"
+      content="A short symbolic world about the person your digital habits are quietly building. Six minutes. Nothing leaves your device."
+    />
+    <meta property="og:url" content="https://daredavil01.github.io/the-second-self/" />
+    <meta property="og:image" content="https://daredavil01.github.io/the-second-self/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="A small warm figure standing alone in a dark, foggy field."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ffc27a'/%3E%3C/svg%3E"
@@ -67,10 +100,9 @@
         padding: 0 1.5rem 3.2rem;
       }
 
-      /* Text is the place good intentions go to die. There are exactly two
-         strings in this build, both offered late and both easily ignored. */
-      #hint,
-      #again {
+      /* Text is the place good intentions go to die. Every string here is
+         offered late, one beat at a time, and every one of them is ignorable. */
+      #hint {
         font-size: 0.95rem;
         letter-spacing: 0.16em;
         text-transform: lowercase;
@@ -83,31 +115,117 @@
         opacity: 1;
       }
 
-      #again {
+      /* The ending. The name arrives alone and is allowed to sit there before
+         anything is asked of the person reading it.
+
+         The dark gathers under the words as they arrive. On a phone the avatar
+         fills most of the frame, and a run that kept its light puts a large
+         bright body exactly where the name has to go — so the name is given
+         ground to stand on rather than the reveal being reframed to make room
+         for it. It comes in over two and a half seconds, with the name. */
+      #ending-overlay::before {
+        content: '';
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 30%;
+        background: linear-gradient(
+          to top,
+          rgba(11, 13, 22, 0.88) 0%,
+          rgba(11, 13, 22, 0.7) 40%,
+          rgba(11, 13, 22, 0.25) 78%,
+          rgba(11, 13, 22, 0) 100%
+        );
+        opacity: 0;
+        transition: opacity 2.6s ease;
+        pointer-events: none;
+      }
+
+      #ending-overlay.visible::before {
+        opacity: 1;
+      }
+
+      #ending {
+        /* Positioned, so the words sit ON the scrim rather than under it — an
+           absolutely-positioned ::before paints above static in-flow content,
+           and the first attempt dimmed the name along with the background. */
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.55rem;
+        max-width: 22rem;
+      }
+
+      #ending > * {
+        opacity: 0;
+        transition: opacity 2s ease;
+      }
+
+      #ending > .visible {
+        opacity: 1;
+      }
+
+      #self-name {
+        font-size: 1.45rem;
+        font-weight: 400;
+        line-height: 1.35;
+        letter-spacing: 0.01em;
+      }
+
+      #self-line,
+      #different {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: rgba(231, 226, 216, 0.5);
+      }
+
+      #different {
+        font-size: 0.78rem;
+        letter-spacing: 0.1em;
+        text-transform: lowercase;
+        color: rgba(231, 226, 216, 0.32);
+        margin-top: 0.9rem;
+      }
+
+      #acts {
+        display: flex;
+        gap: 2rem;
+        margin-top: 0.4rem;
+      }
+
+      #acts button {
         pointer-events: none;
         background: none;
         border: 0;
         font: inherit;
+        font-size: 0.95rem;
         letter-spacing: 0.16em;
+        text-transform: lowercase;
+        color: rgba(231, 226, 216, 0.42);
         border-bottom: 1px solid rgba(231, 226, 216, 0.22);
         padding-bottom: 0.2rem;
         cursor: pointer;
-        transition: opacity 2.4s ease, color 0.4s ease;
+        transition: color 0.4s ease, opacity 0.4s ease;
       }
 
-      #again.visible {
-        opacity: 1;
+      #acts.visible button {
         pointer-events: auto;
       }
 
-      #again:hover,
-      #again:focus-visible {
+      #acts button:hover,
+      #acts button:focus-visible {
         color: rgba(255, 194, 122, 0.9);
+      }
+
+      #acts button[disabled] {
+        opacity: 0.4;
+        cursor: default;
       }
 
       @media (prefers-reduced-motion: reduce) {
         #hint,
-        #again {
+        #ending > * {
           transition-duration: 0.3s;
         }
       }
@@ -130,7 +248,8 @@
         color: rgba(231, 226, 216, 0.6);
       }
 
-      noscript {
+      noscript,
+      #unsupported {
         position: fixed;
         inset: 0;
         display: grid;
@@ -138,6 +257,20 @@
         padding: 2rem;
         text-align: center;
         line-height: 1.7;
+      }
+
+      /* Shown only if the world cannot be drawn at all. */
+      #unsupported {
+        display: none;
+        color: rgba(231, 226, 216, 0.72);
+      }
+
+      #unsupported.visible {
+        display: grid;
+      }
+
+      #unsupported a {
+        color: inherit;
       }
     </style>
   </head>
@@ -148,8 +281,16 @@
     <div class="overlay">
       <p id="hint" aria-live="polite"></p>
     </div>
-    <div class="overlay">
-      <button id="again" type="button">again</button>
+    <div class="overlay" id="ending-overlay">
+      <div id="ending" aria-live="polite">
+        <h1 id="self-name"></h1>
+        <p id="self-line"></p>
+        <p id="different">your second self could be different</p>
+        <div id="acts">
+          <button id="keep" type="button" disabled>keep this</button>
+          <button id="again" type="button">again</button>
+        </div>
+      </div>
     </div>
 
     <a id="promise" href="./privacy/">nothing leaves your device</a>
@@ -157,6 +298,20 @@
     <noscript>
       <p>Second Self is a small 3D world, and it needs JavaScript to run.</p>
     </noscript>
+
+    <!--
+      The last resort. If WebGL is missing or refuses to start there is no world
+      to walk, and the honest thing is to say so rather than leave someone
+      looking at a black rectangle wondering whether it is still loading. The
+      privacy promise stays reachable either way — it is true of this page too.
+    -->
+    <div id="unsupported">
+      <p>
+        Second Self is a small 3D world, and this browser cannot draw it.<br />
+        It may work in a different browser, or on another device.<br />
+        <a href="./privacy/">nothing leaves your device</a>
+      </p>
+    </div>
 
     <script type="module" src="./src/main.ts"></script>
   </body>

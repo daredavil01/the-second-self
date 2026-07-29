@@ -24,9 +24,18 @@
 import * as THREE from 'three';
 import { state } from '../state.js';
 import * as audio from '../audio.js';
+import {
+  discloseAt,
+  nearnessOf,
+  spentBy,
+  STILL,
+  type Room,
+  type RoomFrame,
+  type RoomOptions,
+} from './types.js';
 
-const COST_COLOUR = 0.098;
-const COST_SCALE = 0.058;
+const COST_COLOUR = 0.072;
+const COST_SCALE = 0.038;
 const BURST_COUNT = 90;
 
 /** The panel reads as light, not plaster — a bright core falling off to nothing. */
@@ -48,23 +57,7 @@ function panelTexture(): THREE.CanvasTexture {
   return tex;
 }
 
-export interface DopamineRoom {
-  group: THREE.Group;
-  readonly pulls: number;
-  pull(): void;
-  update(dt: number, t: number, distance: number): void;
-  reset(): void;
-}
-
-export function createDopamineRoom({
-  z,
-  x = -2.9,
-  reducedMotion = false,
-}: {
-  z: number;
-  x?: number;
-  reducedMotion?: boolean;
-}): DopamineRoom {
+export function createDopamineRoom({ z, x = -4.2, reducedMotion = false }: RoomOptions): Room {
   const group = new THREE.Group();
   group.position.z = z;
 
@@ -75,6 +68,7 @@ export function createDopamineRoom({
   group.add(door);
 
   let pulls = 0;
+  let near = 0;
   let leverSwing = 0; // 0 rest, 1 fully pulled
   let flash = 0;
 
@@ -192,17 +186,22 @@ export function createDopamineRoom({
   }
 
   return {
+    id: 'dopamine',
     group,
-    get pulls(): number {
+    get taken(): number {
       return pulls;
     },
+    get nearness(): number {
+      return near;
+    },
+    influence: STILL,
 
     /**
      * The whole point of the room, in four lines: the reward decays, the cost
      * does not, and the answer is always yes.
      */
-    pull(): void {
-      const strength = 1 / (1 + pulls * 0.42);
+    choose(): void {
+      const strength = spentBy(pulls);
 
       audio.pull(strength, pulls);
       if (!reducedMotion) fireBurst(strength);
@@ -214,7 +213,9 @@ export function createDopamineRoom({
       state.mark('scale', COST_SCALE);
     },
 
-    update(dt: number, t: number, distance: number): void {
+    update({ dt, t, distance }: RoomFrame): void {
+      near = nearnessOf(distance);
+
       // Settle the lever back. It is always ready again before you are.
       leverSwing = Math.max(0, leverSwing - dt * 3.4);
       leverPivot.rotation.x = -leverSwing * 0.95;
@@ -224,11 +225,11 @@ export function createDopamineRoom({
       // The opening has to be calm and near-empty, and a glowing destination
       // visible from the first frame gives the whole room away before the
       // player has taken a step.
-      const appear = Math.min(1, Math.max(0, (14 - distance) / 6));
+      const appear = discloseAt(distance, 14);
 
       // The promise dims as it is spent, but never goes out — it has to stay
       // tempting, or walking past costs the player nothing.
-      const spent = 1 / (1 + pulls * 0.42);
+      const spent = spentBy(pulls);
       panelMaterial.opacity = (0.3 + spent * 0.55 + flash * 0.4) * appear;
       panelLight.intensity = (0.7 + spent * 1.5 + flash * 4.5) * appear;
       knobMaterial.emissiveIntensity = (0.55 + spent * 0.75 + flash * 1.6) * appear;
@@ -262,6 +263,7 @@ export function createDopamineRoom({
 
     reset(): void {
       pulls = 0;
+      near = 0;
       leverSwing = 0;
       flash = 0;
       burstLife = 0;

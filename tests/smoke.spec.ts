@@ -1,93 +1,34 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import {
+  boot,
+  debug,
+  selfState,
+  tap,
+  walk,
+  DIMENSIONS,
+  type Dimension,
+  type RoomId,
+} from './harness.js';
 
 /**
- * Phase 0.5 smoke tests.
+ * Smoke tests.
  *
  * These protect the things that are cheap to break and expensive to notice:
- * that the world boots at all, that the mirror only moves the dimensions the
- * dopamine room owns, that the two trajectories genuinely diverge, and that
- * the privacy promise is both reachable and true.
+ * that the world boots at all, that each room moves only the dimensions it
+ * owns, that walking past is final, and that the privacy promise is both
+ * reachable and true.
  *
- * The branch-divergence assertion in "two trajectories" is the seed of the
- * Phase 1 anti-railroad gate — the ending MUST vary with choices, or replay
- * and the gallery have nothing to show.
+ * The anti-railroad gate — the Phase 1 exit criterion — lives next door in
+ * journey.spec.ts.
  */
-
-interface Debug {
-  phase: string;
-  progress: number;
-  target: number;
-  wall: number;
-  leverInReach: boolean;
-  pulls: number;
-  hint: string;
-}
-
-type SelfState = Record<'clarity' | 'posture' | 'colour' | 'scale' | 'world', number>;
-
-const debug = (page: Page) =>
-  page.evaluate(() => window.secondSelf.debug() as unknown as Debug);
-const selfState = (page: Page) =>
-  page.evaluate(() => window.secondSelf.state.get() as unknown as SelfState);
-
-async function boot(page: Page): Promise<void> {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/');
-  await page.waitForFunction(() => typeof window.secondSelf === 'object', null, {
-    timeout: 20_000,
-  });
-  expect(errors, 'no uncaught errors on boot').toEqual([]);
-}
-
-/**
- * Walk forward until `progress` reaches the target, or give up.
- *
- * Deliberately drives real wheel events rather than poking the rail directly —
- * the input path is part of what is under test. Wheels are batched between
- * checks because each check is a round-trip into the page, and under software
- * rendering that dominates the runtime.
- */
-async function walkTo(page: Page, destination: number): Promise<void> {
-  // Steer the rail's TARGET, not its eased progress. Watching progress alone
-  // overshoots badly: progress lags, so by the time it arrives the target has
-  // already run far ahead and the avatar keeps drifting — straight past the
-  // door the test was trying to stop at.
-  const PER_TICK = 240 * 0.00007;
-
-  for (let i = 0; i < 80; i++) {
-    const { target } = await debug(page);
-    const remaining = destination - target;
-    if (remaining <= 0.002) break;
-    const ticks = Math.max(1, Math.min(10, Math.ceil(remaining / PER_TICK)));
-    // Real WheelEvents on the real canvas, through the rail's real listener —
-    // but dispatched in one round-trip. Driving them singly over CDP costs
-    // more than the whole rest of the test.
-    await page.evaluate((n: number) => {
-      const canvas = document.getElementById('scene')!;
-      for (let k = 0; k < n; k++) {
-        canvas.dispatchEvent(
-          new WheelEvent('wheel', { deltaY: 240, cancelable: true, bubbles: true })
-        );
-      }
-    }, ticks);
-    await page.waitForTimeout(30);
-  }
-
-  // Now let the eased progress settle onto the target we stopped steering.
-  await page.waitForFunction(
-    (d: number) => (window.secondSelf.debug()['progress'] as number) >= d - 0.012,
-    destination,
-    { timeout: 30_000 }
-  );
-}
 
 test('the world boots and the threshold is calm', async ({ page }) => {
   await boot(page);
   const initial = await debug(page);
   expect(initial.phase).toBe('travel');
   expect(initial.progress).toBe(0);
-  expect(initial.pulls).toBe(0);
+  expect(initial.inReach).toBeNull();
+  expect(Object.values(initial.taken)).toEqual([0, 0, 0, 0, 0]);
 
   // The opening hint is offered late, and only to someone who has not moved.
   await page.waitForFunction(() => window.secondSelf.debug()['hint'] !== '', null, {
@@ -96,70 +37,139 @@ test('the world boots and the threshold is calm', async ({ page }) => {
   expect(await page.textContent('#hint')).toMatch(/scroll|swipe/);
 });
 
-test('the lever costs only the dimensions this room owns', async ({ page }) => {
-  await boot(page);
-  await walkTo(page, 0.25);
+/**
+ * The ownership table, asserted room by room.
+ *
+ * "Each facet owns exactly one dimension and may nudge one more — never all
+ * five" is the rule that keeps the mirror legible instead of a mood, and it is
+ * the single easiest thing in this project to break by accident. Every room is
+ * checked against docs/IMPLEMENTATION-PLAN.md §3, including the dimensions it
+ * must leave completely alone.
+ */
+const OWNERSHIP: ReadonlyArray<{
+  room: RoomId;
+  taps: number;
+  owns: Dimension;
+  nudges: Dimension | null;
+}> = [
+  { room: 'attention', taps: 8, owns: 'clarity', nudges: null },
+  { room: 'flood', taps: 8, owns: 'posture', nudges: 'clarity' },
+  { room: 'dopamine', taps: 6, owns: 'colour', nudges: 'scale' },
+  { room: 'comparison', taps: 8, owns: 'scale', nudges: 'colour' },
+];
+
+for (const { room, taps, owns, nudges } of OWNERSHIP) {
+  test(`${room} costs only the dimensions it owns`, async ({ page }) => {
+    await boot(page, `?room=${room}`);
+    await expect.poll(async () => (await debug(page)).inReach, { timeout: 15_000 }).toBe(room);
+
+    await tap(page, taps);
+    expect((await debug(page)).taken[room]).toBeGreaterThan(0);
+
+    const s = await selfState(page);
+    expect(s[owns], `${room} owns ${owns}`).toBeGreaterThan(0.3);
+    if (nudges) expect(s[nudges], `${room} nudges ${nudges}`).toBeGreaterThan(0);
+
+    for (const dimension of DIMENSIONS) {
+      if (dimension === owns || dimension === nudges) continue;
+      expect(s[dimension], `${room} must not touch ${dimension}`).toBe(0);
+    }
+  });
+}
+
+/**
+ * The storm gets its own case: it is the one room whose offer arrives on a
+ * clock rather than standing there waiting, so a tap only lands when something
+ * is actually pinging. Tapping into the silence between pings must cost nothing.
+ */
+test('the storm costs only what it owns, and only when it is pinging', async ({ page }) => {
+  await boot(page, '?room=notifications&pace=4');
   await expect
-    .poll(async () => (await debug(page)).leverInReach, { timeout: 10_000 })
-    .toBe(true);
+    .poll(async () => (await debug(page)).inReach, { timeout: 15_000 })
+    .toBe('notifications');
 
-  const viewport = page.viewportSize()!;
-  for (let i = 0; i < 6; i++) {
-    await page.mouse.click(viewport.width / 2, viewport.height / 2);
-    await page.waitForTimeout(300);
-  }
-
-  expect((await debug(page)).pulls).toBe(6);
+  await tap(page, 20, 200);
 
   const s = await selfState(page);
-  // Dopamine owns COLOUR and nudges SCALE. It must touch nothing else — this
-  // is the rule that keeps the mirror legible instead of a mood.
-  expect(s.colour).toBeGreaterThan(0.4);
-  expect(s.scale).toBeGreaterThan(0.2);
+  expect(s.world, 'the storm owns world').toBeGreaterThan(0.2);
+  expect(s.posture, 'and nudges posture').toBeGreaterThan(0);
   expect(s.clarity).toBe(0);
-  expect(s.posture).toBe(0);
-  expect(s.world).toBe(0);
-});
+  expect(s.colour).toBe(0);
+  expect(s.scale).toBe(0);
 
-test('two trajectories end in genuinely different selves', async ({ page }) => {
-  await boot(page);
-
-  // Heedless: stop and pull.
-  await walkTo(page, 0.25);
-  const viewport = page.viewportSize()!;
-  for (let i = 0; i < 8; i++) {
-    await page.mouse.click(viewport.width / 2, viewport.height / 2);
-    await page.waitForTimeout(280);
-  }
-  await walkTo(page, 0.83);
-  await expect.poll(async () => (await debug(page)).phase, { timeout: 25_000 }).toBe('reveal');
-  const heedless = await selfState(page);
-
-  // Careful: walk straight past.
-  await page.locator('#again').click();
-  await page.waitForTimeout(600);
-  expect((await selfState(page)).colour).toBe(0);
-
-  await walkTo(page, 0.83);
-  await expect.poll(async () => (await debug(page)).phase, { timeout: 25_000 }).toBe('reveal');
-  const careful = await selfState(page);
-
-  expect(heedless.colour - careful.colour).toBeGreaterThan(0.5);
-  expect(heedless.scale - careful.scale).toBeGreaterThan(0.3);
+  // Every tap that landed answered something real. Some of the twenty fell into
+  // the silence between pings and cost nothing, which is the difference between
+  // a storm and a button.
+  const { taken } = await debug(page);
+  expect(taken.notifications).toBeGreaterThan(2);
+  expect(taken.notifications).toBeLessThan(20);
 });
 
 test('the reach window closes once you have walked past', async ({ page }) => {
-  await boot(page);
-  await walkTo(page, 0.55); // well beyond the door at 0.34
-  expect((await debug(page)).leverInReach).toBe(false);
+  await boot(page, '?room=dopamine&pace=3');
+  await expect.poll(async () => (await debug(page)).inReach, { timeout: 20_000 }).toBe('dopamine');
 
-  const viewport = page.viewportSize()!;
-  await page.mouse.click(viewport.width / 2, viewport.height / 2);
-  await page.waitForTimeout(300);
+  await walk(page, 0.47); // past the door at 0.43, short of the corridor at 0.59
+  await expect
+    .poll(async () => (await debug(page)).inReach, { timeout: 20_000 })
+    .not.toBe('dopamine');
+
+  await tap(page, 3);
 
   // Walking on has to be final, or it is a postponement rather than a choice.
-  expect((await debug(page)).pulls).toBe(0);
-  expect((await selfState(page)).colour).toBe(0);
+  expect((await debug(page)).taken.dopamine).toBe(0);
+});
+
+test('the journey has a floor pace that scrolling harder cannot shorten', async ({ page }) => {
+  await boot(page);
+
+  // Flood it with far more input than the whole track is worth. The rail banks
+  // what it can use and drops the rest — the walk is not negotiable, and that
+  // is the point of the walk.
+  await page.evaluate(() => {
+    const canvas = document.getElementById('scene')!;
+    for (let k = 0; k < 400; k++) {
+      canvas.dispatchEvent(
+        new WheelEvent('wheel', { deltaY: 400, cancelable: true, bubbles: true })
+      );
+    }
+  });
+  await page.waitForTimeout(1500);
+
+  const { progress, target, phase } = await debug(page);
+  expect(progress, 'a second and a half of world, not a whole journey').toBeLessThan(0.05);
+  expect(target, 'and the input banked rather than piling up').toBeLessThan(0.06);
+  expect(phase).toBe('travel');
+});
+
+test('a browser that cannot draw the world says so rather than showing nothing', async ({
+  page,
+}) => {
+  // WebGL is missing or blocked far more often than a desktop makes it look.
+  // Refusing every WebGL context is the closest thing to an old Android or a
+  // locked-down work profile that a test can arrange.
+  await page.addInitScript(() => {
+    const real = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      kind: string,
+      ...rest: unknown[]
+    ) {
+      if (kind.includes('webgl')) return null;
+      return (real as (...a: unknown[]) => unknown).call(this, kind, ...rest);
+    } as typeof HTMLCanvasElement.prototype.getContext;
+  });
+
+  await page.goto('/');
+
+  // A black rectangle with no explanation is the failure this is guarding
+  // against: the visitor cannot tell it from something still loading.
+  await expect(page.locator('#unsupported')).toBeVisible();
+  await expect(page.locator('#unsupported')).toContainText('cannot draw it');
+
+  // And the promise stays reachable, because it is true of this page too.
+  await page.locator('#unsupported a').click();
+  await expect(page).toHaveURL(/privacy/);
 });
 
 test('the privacy promise is reachable, and forgetting works', async ({ page }) => {

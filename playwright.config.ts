@@ -12,7 +12,13 @@ export default defineConfig({
   // Each test runs a live WebGL scene. Under a software rasteriser (CI, and any
   // container without a GPU) too many at once starve each other's frame loop
   // and everything times out for reasons that have nothing to do with the code.
-  workers: process.env['CI'] ? 2 : 3,
+  //
+  // Two, not three, since the share tests landed: composing a card reads four
+  // megapixels back off the GPU, and at three workers that was enough extra
+  // load to start timing out an unrelated test that passes in 2.6 seconds on
+  // its own. The number is a property of how much work the suite does, so it
+  // has to be revisited whenever the suite gets heavier — see LESSONS L12.
+  workers: 2,
   // Generous: every test drives the real input path through a software
   // rasteriser, which is far slower than any real device.
   timeout: 120_000,
