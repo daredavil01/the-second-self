@@ -22,34 +22,43 @@ and *peace is offered, never earned*.
 
 ---
 
-## 1. Decisions locked
+## 1. Decisions taken — pending visual confirmation
 
-| Area | Decision |
-|---|---|
-| **Identity** | **Anonymous forever.** No accounts, ever, for the core. All state in `localStorage`/IndexedDB, plus a "carry your self" export/import code for cross-device. |
-| **Analytics / counter** | **GoatCounter** (free, cookieless, no personal data, ~3.5KB). Real numbers stay private; one understated line in About. No hero counter. |
-| **About** | Four dedicated static pages: `/about/` · `/privacy/` · `/evidence/` · `/credits/`. |
-| **Voice** | **Named personal byline** — "I built this because…", with a contact route. |
-| **v1 scope** | **Spine only.** Journey + reveal + share card + peaceful place. No hub-as-curriculum, no 2D modules, no role lens. |
-| **Tooling** | **Buildless Phase 0** (one HTML file, import maps), then **Vite + TypeScript** from Phase 0.5. |
-| **3D assets** | **Procedural geometry in code.** No model files, no artist, no compression pipeline. |
-| **Facets** | **All five** — fractured attention, information flood, dopamine loop, comparison corridor, notification storm. |
-| **Gesture** | **Scroll to move, tap/hold to choose.** |
-| **Ending** | **Continuous 5-dimension state vector, bucketed into ~8 named selves** on the card. |
-| **Run length** | **6–7 minutes**, soft ~10 min cap on the return layer, delivered in character. |
-| **Name / URL** | Keep "Second Self", ship on `daredavil01.github.io/the-second-self/`. |
-| **Evidence page** | **Myth-busting subset first** (dopamine detox, goldfish attention span, filter bubbles, backfire effect), grown later. |
-| **Toolkit / Part E** | Deferred until the spine ships and has real users. |
-| **Working mode** | Solo, evenings and weekends, no deadline → phases sized to stand alone and be shippable independently. |
+These were decided in discussion. **They are directional, not final.** Anything that has
+a look, a feel, or a pace cannot honestly be settled from a description — it gets
+**previewed first and explicitly confirmed after**, per the protocol in §4.
+
+Rows marked **structural** are architecture and can be relied on now. Rows marked
+**experiential** are provisional until previewed and signed off.
+
+| Area | Decision | Kind |
+|---|---|---|
+| **Identity** | **Anonymous forever.** No accounts, ever, for the core. All state in `localStorage`/IndexedDB, plus a "carry your self" export/import code for cross-device. | structural |
+| **Analytics / counter** | **GoatCounter** (free, cookieless, no personal data, ~3.5KB). Real numbers stay private; one understated line in About. No hero counter. | structural |
+| **About** | Four dedicated static pages: `/about/` · `/privacy/` · `/evidence/` · `/credits/`. | structural |
+| **Voice** | **Named personal byline** — "I built this because…", with a contact route. | experiential |
+| **v1 scope** | **Spine only.** Journey + reveal + share card + peaceful place. No hub-as-curriculum, no 2D modules, no role lens. | structural |
+| **Tooling** | **Buildless Phase 0** (one HTML file, import maps), then **Vite + TypeScript** from Phase 0.5. | structural |
+| **3D assets** | **Procedural geometry in code.** No model files, no artist, no compression pipeline. | structural |
+| **Facets** | **All five** — fractured attention, information flood, dopamine loop, comparison corridor, notification storm. | structural |
+| **Gesture** | **Scroll to move, tap/hold to choose.** | experiential |
+| **Ending** | **Continuous 5-dimension state vector, bucketed into ~8 named selves** on the card. | experiential |
+| **Run length** | **6–7 minutes**, soft ~10 min cap on the return layer, delivered in character. | experiential |
+| **Name / URL** | Keep "Second Self", ship on `daredavil01.github.io/the-second-self/`. | structural |
+| **Evidence page** | **Myth-busting subset first** (dopamine detox, goldfish attention span, filter bubbles, backfire effect), grown later. | structural |
+| **Toolkit / Part E** | Deferred until the spine ships and has real users. | structural |
+| **Working mode** | Solo, evenings and weekends, no deadline → phases sized to stand alone and be shippable independently. | — |
 
 **Two trades, made deliberately and recorded so they stay visible:**
 
 1. **Five facets at 6–7 minutes** buys full coverage of the argument at a measurable cost
    to completion and share-through — the compendium leans 4–5 min for shareability.
-   Accepted.
+   Accepted, and re-tested against a timed playthrough at the Phase 1 confirmation gate.
 2. **Splitting the gesture** (scroll to move, tap/hold to choose) gives up the thematic
    bite of "you scroll your way through a world about the cost of scrolling" in exchange
-   for a clearer separation of travel from decision. Accepted.
+   for a clearer separation of travel from decision. Accepted, and re-tested on a real
+   phone at the Phase 0 confirmation gate — the compendium itself says to check the
+   gesture feels good in 3D on a phone before locking it.
 
 ---
 
@@ -120,27 +129,68 @@ grotesque. Sad-but-recognisable invites empathy; grotesque invites distance.
 
 ---
 
-## 4. Status board
+## 4. Design confirmation protocol
 
-Living tracker — update the status cell as each phase moves.
+**The rule: no experiential design choice is final until it has been previewed and
+explicitly confirmed.** A menu selection is a direction; a preview is the decision. This
+exists because the whole project rests on how something *feels*, and feel does not
+survive being described in prose.
+
+**How it works, every time:**
+
+1. The choice is built to a previewable state — deployed to the Pages URL, or a set of
+   stills, or a short screen capture, whichever actually shows the thing.
+2. It gets reviewed **on a real phone** as well as desktop, since mobile is the primary
+   target and the compendium treats it as a hard constraint.
+3. Confirmation is **explicit and recorded** — the row below is ticked with the date.
+   Silence is not confirmation, and no choice is ever self-approved on the builder's side.
+4. If it doesn't land, it changes. Reversing a confirmed-in-principle decision at its
+   preview gate is a normal outcome, not a failure — that is what the gate is for.
+5. **A phase cannot be marked ✅ Done while any of its design rows are unconfirmed.**
+
+| # | Design choice awaiting confirmation | Previewed as | Gate | Confirmed |
+|---|---|---|---|---|
+| D1 | Core gesture feel — scroll to move, tap/hold to choose | Live build, on your own phone | Phase 0 | ⬜ |
+| D2 | Avatar visual language | Stills at min and max of each of the five dimensions | Phase 0 | ⬜ |
+| D3 | Palette and overall tone | Live build | Phase 0 | ⬜ |
+| D4 | The reveal beat — camera turn, silence, timing | Screen capture of the turn | Phase 0 | ⬜ |
+| D5 | Each of the five room designs, one at a time | Live build, room by room | Phase 1 | ⬜ |
+| D6 | Run pacing at 6–7 minutes | Timed full playthrough | Phase 1 | ⬜ |
+| D7 | Audio beds, and the silence at the turn | Capture with sound | Phase 1 | ⬜ |
+| D8 | The ~8 named selves — exact wording | Plain list, reviewed before it is wired in | Phase 2 | ⬜ |
+| D9 | End-card layout | Rendered cards from three different runs | Phase 2 | ⬜ |
+| D10 | Peaceful place register — warmth, pace, ambience | Live build | Phase 3 | ⬜ |
+| D11 | Gallery presentation — ambient, not a completion grid | Live build with several saved selves | Phase 3 | ⬜ |
+| D12 | About / privacy / credits copy in your named voice | Draft copy, before it is published | Phase 3 | ⬜ |
+| D13 | Evidence-page tier presentation | Draft page | Phase 4 | ⬜ |
+
+Structural decisions in §1 are **not** in this table — they are architecture, they were
+reasoned rather than felt, and the build depends on them being stable. Changing one is a
+replan, not a preview note.
+
+---
+
+## 5. Status board
+
+Living tracker — update the status cells as each phase moves.
 
 **Legend:** `⬜ Not started` · `🟡 In progress` · `✅ Done` · `⛔ Blocked` · `⏸️ Deferred`
 
-| Phase | What it delivers | Status | Exit criterion met? |
-|---|---|---|---|
-| **0** — Prove the feeling | One HTML file, dopamine room, bare reveal | ⬜ Not started | — |
-| **0.5** — Foundation | Vite + TS, Pages deploy, path guard, GoatCounter, `/privacy/` | ⬜ Not started | — |
-| **1** — Core journey | All five rooms, accumulating state, the turn, the reveal, audio | ⬜ Not started | — |
-| **2** — Share engine | End card, named selves, share sheet, link-back, replay | ⬜ Not started | — |
-| **3** — Peaceful place | Hub, gallery, tend beat, soft cap, export code, `/about/` `/credits/` | ⬜ Not started | — |
-| **4** — Evidence surface | `/evidence/` myth-busting subset, verified reference links | ⬜ Not started | — |
-| **5+** — Toolkit | 2D modules, lesson engine, role lens, educator materials, Part E | ⏸️ Deferred | Gated on Phase 2 user evidence |
+| Phase | What it delivers | Status | Design confirmed | Exit criterion met? |
+|---|---|---|---|---|
+| **0** — Prove the feeling | One HTML file, dopamine room, bare reveal | ⬜ Not started | ⬜ D1–D4 | — |
+| **0.5** — Foundation | Vite + TS, Pages deploy, path guard, GoatCounter, `/privacy/` | ⬜ Not started | n/a | — |
+| **1** — Core journey | All five rooms, accumulating state, the turn, the reveal, audio | ⬜ Not started | ⬜ D5–D7 | — |
+| **2** — Share engine | End card, named selves, share sheet, link-back, replay | ⬜ Not started | ⬜ D8–D9 | — |
+| **3** — Peaceful place | Hub, gallery, tend beat, soft cap, export code, `/about/` `/credits/` | ⬜ Not started | ⬜ D10–D12 | — |
+| **4** — Evidence surface | `/evidence/` myth-busting subset, verified reference links | ⬜ Not started | ⬜ D13 | — |
+| **5+** — Toolkit | 2D modules, lesson engine, role lens, educator materials, Part E | ⏸️ Deferred | — | Gated on Phase 2 user evidence |
 
 **Current position:** planning complete, no code written. Next action is Phase 0.
 
 ---
 
-## 5. Phases
+## 6. Phases
 
 ### Phase 0 — Prove the feeling (vertical slice) ⬜ Not started
 
@@ -158,13 +208,18 @@ build step, no repo ceremony.
   self-contained and its mirror is the most immediate.
 - A bare reveal: motion stops, silence, the camera comes around
 
-**Exit criterion (hard gate).** Show it cold to 5–10 people. Does watching the avatar
-change in response to *their own* choices produce "oh… that's me"? If not, redesign the
-mirror before building anything else. Do not proceed on hope.
+**Preview & confirm (D1–D4).** Before anyone else sees it: you play the build on your own
+phone and desktop, and confirm the gesture, the avatar's visual language, the palette,
+and the reveal beat — or send them back. Nothing proceeds to Phase 0.5 on unconfirmed
+design.
+
+**Exit criterion (hard gate).** *Then* show it cold to 5–10 people. Does watching the
+avatar change in response to *their own* choices produce "oh… that's me"? If not, redesign
+the mirror before building anything else. Do not proceed on hope.
 
 ### Phase 0.5 — Foundation ⬜ Not started
 
-Only after Phase 0 passes.
+Only after Phase 0 passes both gates.
 
 - Vite + TypeScript, `base: '/the-second-self/'`, GitHub Actions `actions/deploy-pages`
 - **Relative-path CI guard** — fail the build on any `src="/…"` or `url(/…)`. The
@@ -177,6 +232,9 @@ Only after Phase 0 passes.
 - The GoatCounter snippet and `/privacy/` ship **together**, so the promise is live on
   the first public deploy
 
+Purely structural — no design confirmation gate. Its value is that from here on, every
+subsequent preview is a real deployed URL you can open on any device.
+
 ### Phase 1 — The core journey ⬜ Not started
 
 - Four more rooms: `attention`, `flood`, `comparison`, `notifications`
@@ -188,6 +246,11 @@ Only after Phase 0 passes.
 - Audio: synthesised Web Audio beds per room — escalating satisfaction on the lever, a
   muffled underwater wash in the flood, sharp fragmenting tones as attention breaks
 - Pacing pass to land the whole run at 6–7 minutes
+
+**Preview & confirm (D5–D7).** Rooms go to preview **one at a time**, not as a batch — a
+weak room is far cheaper to find alone than buried in a finished journey. Then a timed
+end-to-end playthrough confirms the 6–7 minute pacing decision, which is the point at
+which the five-facet trade in §1 gets honestly re-examined.
 
 **Exit criterion.** An automated run asserts that an all-healthy and an all-heedless
 playthrough end in materially different state vectors. This is the anti-railroad
@@ -206,6 +269,12 @@ experiences.
   link previews well
 - Immediate replay entry: "your Second Self could be different"
 
+**Preview & confirm (D8–D9).** The eight names are reviewed as a **plain list before any
+of them are wired in** — this is the highest-risk copy in the project, because a single
+name that reads as a verdict rather than a characterisation reintroduces the shame the
+whole design exists to avoid. Then rendered cards from three genuinely different runs
+confirm the layout.
+
 ### Phase 3 — The peaceful place & return layer ⬜ Not started
 
 - `src/scenes/peaceful.ts` — perpetual soft night, stars always visible, light moving on
@@ -219,6 +288,10 @@ experiences.
 - **"Carry your self" export/import code** — the cross-device answer with no backend
 - `/about/` and `/credits/` ship here
 
+**Preview & confirm (D10–D12).** The peaceful place is confirmed by sitting in it, not by
+looking at a screenshot — warmth and pace are the entire point. The About copy is
+confirmed as draft text before publication, because it goes out under your name.
+
 ### Phase 4 — The About & evidence surface ⬜ Not started
 
 - `/evidence/` with the myth-busting subset first, each card carrying its
@@ -227,6 +300,9 @@ experiences.
   records, the Apache-2.0 note, repo link, and a feedback route
 - **Verify every reference URL before publishing.** The compendium explicitly flags its
   own link list as unchecked, and several of those projects have moved or retired.
+
+**Preview & confirm (D13).** Draft page reviewed before publication — the tier labels are
+a public credibility claim and need to read as honest rather than hedging.
 
 ### Phase 5+ — Deferred, documented, not scheduled ⏸️ Deferred
 
@@ -245,7 +321,7 @@ isolated behind that one gate.
 
 ---
 
-## 6. Target file structure
+## 7. Target file structure
 
 ```
 index.html
@@ -266,19 +342,21 @@ indexable, and they cost no WebGL.
 
 ---
 
-## 7. Verification
+## 8. Verification
 
-- **Phase 0 is a human test, not a code test** — 5–10 cold users, one question.
+- **Phase 0 has two gates and they are not the same thing** — the design confirmation
+  (§4, you) comes first, the "that's me" test (5–10 cold users) comes second.
 - `npm run dev` locally; then `npm run build && npm run preview` **with the base path
   set** — subpath breakage does not reproduce on a dev server.
 - CI: relative-path guard · branch-divergence assertion (Phase 1) · Playwright smoke run
   driving the rail end-to-end and asserting the reveal renders.
-- Deploy to Pages, then open the live subpath URL on a real mid-range Android.
+- Deploy to Pages, then open the live subpath URL on a real mid-range Android. From
+  Phase 0.5 on, this deployed URL *is* the preview mechanism for every confirmation gate.
 - Link-check every reference before `/evidence/` or `/credits/` ships.
 
 ---
 
-## 8. Deliberate departures from the compendium
+## 9. Deliberate departures from the compendium
 
 1. **Vite from Phase 0.5, instead of buildless throughout.** This does not break the
    "static vanilla HTML/JS + Three.js on GitHub Pages" lock — the output is still static
@@ -290,5 +368,5 @@ indexable, and they cost no WebGL.
    value. Roughly 60 lines, no CDN dependency, and keyboard accessibility falls out for
    free.
 3. **Five facets at 6–7 minutes**, rather than the compendium's recommended three at 4–5.
-   Chosen for coverage over shareability — recorded here so the trade stays visible if
-   completion rates disappoint.
+   Chosen for coverage over shareability — recorded here so the trade stays visible, and
+   re-examined at the D6 confirmation gate against a timed playthrough.
