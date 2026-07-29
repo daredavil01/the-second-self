@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Second Self</title>
+    <meta name="description" content="A short symbolic world about the person your digital habits are quietly building." />
+    <meta name="color-scheme" content="dark" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ffc27a'/%3E%3C/svg%3E"
+    />
+
+    <!--
+      Three.js is bundled from node_modules, never fetched from a CDN. This
+      piece promises that nothing leaves your device, and a CDN import would
+      make every visitor's browser call a third party on arrival — breaking
+      the promise on the very first request, before the user has done a thing.
+      Bundling keeps every byte first-party.
+
+      Vite is configured with a RELATIVE base, so every emitted path is
+      relative. On GitHub Pages this is served from a subdirectory, and a
+      root-absolute path is the single most common way that deployment breaks:
+      it works locally and 404s in production. `npm run check:paths` fails the
+      build if one ever creeps in.
+    -->
+    <style>
+      :root {
+        --ink: #e7e2d8;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: #0b0d16;
+      }
+
+      body {
+        font-family: ui-serif, Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+        overscroll-behavior: none;
+      }
+
+      #scene {
+        display: block;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        cursor: default;
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        pointer-events: none;
+        padding: 0 1.5rem 3.2rem;
+      }
+
+      /* Text is the place good intentions go to die. There are exactly two
+         strings in this build, both offered late and both easily ignored. */
+      #hint,
+      #again {
+        font-size: 0.95rem;
+        letter-spacing: 0.16em;
+        text-transform: lowercase;
+        opacity: 0;
+        transition: opacity 1.6s ease;
+        color: rgba(231, 226, 216, 0.42);
+      }
+
+      #hint.visible {
+        opacity: 1;
+      }
+
+      #again {
+        pointer-events: none;
+        background: none;
+        border: 0;
+        font: inherit;
+        letter-spacing: 0.16em;
+        border-bottom: 1px solid rgba(231, 226, 216, 0.22);
+        padding-bottom: 0.2rem;
+        cursor: pointer;
+        transition: opacity 2.4s ease, color 0.4s ease;
+      }
+
+      #again.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #again:hover,
+      #again:focus-visible {
+        color: rgba(255, 194, 122, 0.9);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #hint,
+        #again {
+          transition-duration: 0.3s;
+        }
+      }
+
+      #promise {
+        position: fixed;
+        left: 50%;
+        bottom: 1rem;
+        transform: translateX(-50%);
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: lowercase;
+        color: rgba(231, 226, 216, 0.24);
+        text-decoration: none;
+        transition: color 0.6s ease;
+      }
+
+      #promise:hover,
+      #promise:focus-visible {
+        color: rgba(231, 226, 216, 0.6);
+      }
+
+      noscript {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        text-align: center;
+        line-height: 1.7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div class="overlay">
+      <p id="hint" aria-live="polite"></p>
+    </div>
+    <div class="overlay">
+      <button id="again" type="button">again</button>
+    </div>
+
+    <a id="promise" href="./privacy/">nothing leaves your device</a>
+
+    <noscript>
+      <p>Second Self is a small 3D world, and it needs JavaScript to run.</p>
+    </noscript>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

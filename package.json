@@ -1,0 +1,28 @@
+{
+  "name": "second-self",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "A short symbolic 3D world that lets you meet the person your digital habits are quietly building.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check:paths": "node scripts/check-paths.mjs",
+    "check:size": "node scripts/check-size.mjs",
+    "test": "playwright test",
+    "verify": "npm run build && npm run check:paths && npm run check:size && npm test"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.2",
+    "@types/three": "^0.185.1",
+    "playwright": "^1.62.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5"
+  }
+}
