@@ -178,7 +178,7 @@ Living tracker — update the status cells as each phase moves.
 
 | Phase | What it delivers | Status | Design confirmed | Exit criterion met? |
 |---|---|---|---|---|
-| **0** — Prove the feeling | One HTML file, dopamine room, bare reveal | ⬜ Not started | ⬜ D1–D4 | — |
+| **0** — Prove the feeling | One HTML file, dopamine room, bare reveal | 🟡 In progress — built, awaiting your preview | ⬜ D1–D4 | ⬜ cold-user test not yet run |
 | **0.5** — Foundation | Vite + TS, Pages deploy, path guard, GoatCounter, `/privacy/` | ⬜ Not started | n/a | — |
 | **1** — Core journey | All five rooms, accumulating state, the turn, the reveal, audio | ⬜ Not started | ⬜ D5–D7 | — |
 | **2** — Share engine | End card, named selves, share sheet, link-back, replay | ⬜ Not started | ⬜ D8–D9 | — |
@@ -186,13 +186,14 @@ Living tracker — update the status cells as each phase moves.
 | **4** — Evidence surface | `/evidence/` myth-busting subset, verified reference links | ⬜ Not started | ⬜ D13 | — |
 | **5+** — Toolkit | 2D modules, lesson engine, role lens, educator materials, Part E | ⏸️ Deferred | — | Gated on Phase 2 user evidence |
 
-**Current position:** planning complete, no code written. Next action is Phase 0.
+**Current position:** Phase 0 is built and runs end to end. Next action is the D1–D4
+design confirmation (§4) — you play it — and only then the 5–10 person cold-user test.
 
 ---
 
 ## 6. Phases
 
-### Phase 0 — Prove the feeling (vertical slice) ⬜ Not started
+### Phase 0 — Prove the feeling (vertical slice) 🟡 In progress
 
 The riskiest assumption in the entire project is *does the mirror moment land*. Nothing
 else matters until it does. **Literally one HTML file**, Three.js via import map, no
